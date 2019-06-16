@@ -1,21 +1,21 @@
-Vue.component(`messages-list`, {
+Vue.component(`kebab-ingredients-list`, {
     template: `
     <div>
       <hr><h2 class="subtitle">{{ title }}</h2><hr>
-      <div v-for="message in messages">
-        <h2 class="subtitle">{{ message }}</h2>
+      <div v-for="ingredient in ingredients">
+        <h2 class="subtitle">{{ ingredient }}</h2>
       </div>
     </div>
   `,
     data() {
         return {
-            title: "Messages List",
-            messages: []
+            title: "Kebab Ingredients List",
+            ingredients: []
         }
     },
     methods: {
         populateTheList: function() {
-            fetch(`/messages`, {
+            fetch(`/kebab-ingredients`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json'
@@ -23,7 +23,7 @@ Vue.component(`messages-list`, {
             })
             .then(response => response.json())
             .then(data => {
-                data.forEach(message => this.messages.push(message.text));
+                data.forEach(ingredient => this.ingredients.push(ingredient.label));
             })
             .catch(error => {
                 console.log(error);
@@ -33,14 +33,14 @@ Vue.component(`messages-list`, {
     mounted() {
         this.populateTheList()
 
-        this.$root.$on("add-message", (message) => {
-            this.messages.push(message);
-            fetch(`/messages`, {
+        this.$root.$on("add-ingredient", (ingredient) => {
+            this.ingredients.push(ingredient);
+            fetch(`/kebab-ingredients`, {
                 method: 'POST',
                 headers: {
                     "Content-Type": "text/plain",
                 },
-                body: "text=" + message
+                body: "label=" + ingredient
             })
             .then(response => response.json())
             .then(data => {

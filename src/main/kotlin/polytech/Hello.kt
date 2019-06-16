@@ -13,6 +13,13 @@ fun main(args: Array<String>) {
         Message("Bonjour")
     )
 
+    data class Ingredient(val label: String)
+    val kebabIngredients: MutableList<Ingredient> = mutableListOf(
+        Ingredient("Bread"),
+        Ingredient("Meat"),
+        Ingredient("Cheese")
+    )
+
     val app = Javalin.create()
 
     app.enableStaticFiles("./public", Location.EXTERNAL).start(7000)
@@ -30,4 +37,13 @@ fun main(args: Array<String>) {
         ctx.json(newMessage).status(201)
     }
 
+    // Exercice 2
+    app.get("/kebab-ingredients") { ctx -> ctx.json(kebabIngredients) }
+
+    app.post("/kebab-ingredients") { ctx ->
+
+        val newIngredient = Ingredient(ctx.formParam("label").toString())
+        kebabIngredients.add(newIngredient)
+        ctx.json(newIngredient).status(201)
+    }
 }
