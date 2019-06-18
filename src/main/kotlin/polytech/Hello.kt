@@ -46,4 +46,11 @@ fun main(args: Array<String>) {
         kebabIngredients.add(newIngredient)
         ctx.json(newIngredient).status(201)
     }
+
+    app.delete("/kebab-ingredients") { ctx ->
+
+        val ingredientToDelete = Ingredient(ctx.formParam("label").toString())
+        kebabIngredients.remove(ingredientToDelete)
+        ctx.json(ingredientToDelete).status(201)
+    }
 }

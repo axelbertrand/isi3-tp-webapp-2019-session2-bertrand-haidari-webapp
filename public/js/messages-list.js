@@ -1,10 +1,10 @@
 Vue.component(`messages-list`, {
     template: `
     <div>
-      <hr><h2 class="subtitle">{{ title }}</h2><hr>
-      <div v-for="message in messages">
-        <h2 class="subtitle">{{ message }}</h2>
-      </div>
+        <hr><h2 class="subtitle">{{ title }}</h2><hr>
+        <div v-for="message in messages" style="margin-bottom: 0.5rem;">
+            <h2 class="tag is-light is-large">{{ message }}</h2>
+        </div>
     </div>
   `,
     data() {
