@@ -18,10 +18,16 @@ Vue.component(`kebab-ingredients-list`, {
     },
     methods: {
         populateTheList: function() {
+            let credentials = JSON.parse(window.localStorage.getItem('my_credentials'))
+
+            let token = (credentials==null || credentials==undefined)
+                ? null
+                : credentials.token
             fetch(`/kebab-ingredients`, {
                 method: 'GET',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'token': token
                 }
             })
             .then(response => response.json())
@@ -34,10 +40,16 @@ Vue.component(`kebab-ingredients-list`, {
         },
         deleteIngredient: function(ingredient) {
             this.ingredients = this.ingredients.filter(item => item !== ingredient);
+            let credentials = JSON.parse(window.localStorage.getItem('my_credentials'))
+
+            let token = (credentials==null || credentials==undefined)
+                ? null
+                : credentials.token
             fetch(`/kebab-ingredients`, {
                 method: 'DELETE',
                 headers: {
                     "Content-Type": "text/plain",
+                    "token": token
                 },
                 body: "label=" + ingredient
             })
@@ -55,10 +67,16 @@ Vue.component(`kebab-ingredients-list`, {
 
         this.$root.$on("add-ingredient", (ingredient) => {
             this.ingredients.push(ingredient);
+            let credentials = JSON.parse(window.localStorage.getItem('my_credentials'))
+
+            let token = (credentials==null || credentials==undefined)
+                ? null
+                : credentials.token
             fetch(`/kebab-ingredients`, {
                 method: 'POST',
                 headers: {
                     "Content-Type": "text/plain",
+                    "token": token
                 },
                 body: "label=" + ingredient
             })
