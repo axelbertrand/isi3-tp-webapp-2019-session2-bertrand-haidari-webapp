@@ -1,43 +1,59 @@
 Vue.component(`login`, {
     template: `
-    <div class="control">
-        <input v-model="username" type="text" id="username" name="username" placeholder="Username" class="input">
-    </div>
-    <div class="control">
-        <input v-model="password" type="password" id="password" name="password" placeholder="Password" class="input">
-    </div>
-    <div class="control">
-        <button v-on:click="login" class="button is-info">
-            Log in
-        </button>
-    </div>
+    <nav class="navbar has-background-grey-dark is-space">
+        <div class="container">
+            <div class="navbar-menu">
+                <div class="navbar-start">
+                    <template v-if="token === null">
+                        <div class="navbar-item">
+                            <input v-model="username" type="text" placeholder="Username" class="input">
+                        </div>
+                        <div class="navbar-item">
+                            <input v-model="password" type="password" placeholder="Password" class="input">
+                        </div>
+                        <div class="navbar-item">
+                            <button v-on:click="login" class="button is-info">
+                                Log in
+                            </button>
+                        </div>
+                        </template>
+                        <template v-else>
+                            {{ username }}
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
   `,
     data() {
         return {
-            username: "",
-            password: ""
+            username: null,
+            password: null,
+            token: null
         }
     },
     methods: {
-        login: function() {
+        login(event) {
             fetch(`/admin/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    name: username, pwd: password
+                    name: this.username, pwd: this.password
                 }), // body data type must match "Content-Type" header
             })
             .then(response => {
                 return response.json()
             })
             .then(data =>  {
-                if(!data.token) {
-                    window.localStorage.setItem('my_credentials', null)
-                } else {
-                    window.localStorage.setItem('my_credentials', JSON.stringify({token: data.token, user: username}))
-                }
+                this.token = (!data.jwt)
+                    ? null
+                    : JSON.stringify({token: data.jwt, user: this.username});
+
+                window.localStorage.setItem('my_credentials', this.token);
+                this.$root.$emit("login");
             })
             .catch(error => {});
         }

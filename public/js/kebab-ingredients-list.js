@@ -13,21 +13,17 @@ Vue.component(`kebab-ingredients-list`, {
     data() {
         return {
             title: "Kebab Ingredients List",
-            ingredients: []
+            ingredients: [],
+            token: null
         }
     },
     methods: {
         populateTheList: function() {
-            let credentials = JSON.parse(window.localStorage.getItem('my_credentials'))
-
-            let token = (credentials==null || credentials==undefined)
-                ? null
-                : credentials.token
             fetch(`/kebab-ingredients`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    'token': token
+                    'token': this.token
                 }
             })
             .then(response => response.json())
@@ -39,23 +35,18 @@ Vue.component(`kebab-ingredients-list`, {
             })
         },
         deleteIngredient: function(ingredient) {
-            this.ingredients = this.ingredients.filter(item => item !== ingredient);
-            let credentials = JSON.parse(window.localStorage.getItem('my_credentials'))
-
-            let token = (credentials==null || credentials==undefined)
-                ? null
-                : credentials.token
             fetch(`/kebab-ingredients`, {
                 method: 'DELETE',
                 headers: {
                     "Content-Type": "text/plain",
-                    "token": token
+                    "token": this.token
                 },
                 body: "label=" + ingredient
             })
             .then(response => response.json())
             .then(data => {
                 console.log(data)
+                this.ingredients = this.ingredients.filter(item => item !== ingredient);
             })
             .catch(error => {
                 console.log(error)
@@ -66,27 +57,30 @@ Vue.component(`kebab-ingredients-list`, {
         this.populateTheList()
 
         this.$root.$on("add-ingredient", (ingredient) => {
-            this.ingredients.push(ingredient);
-            let credentials = JSON.parse(window.localStorage.getItem('my_credentials'))
-
-            let token = (credentials==null || credentials==undefined)
-                ? null
-                : credentials.token
+            console.log(this.token);
             fetch(`/kebab-ingredients`, {
                 method: 'POST',
                 headers: {
                     "Content-Type": "text/plain",
-                    "token": token
+                    "token": this.token
                 },
                 body: "label=" + ingredient
             })
             .then(response => response.json())
             .then(data => {
                 console.log(data)
+                this.ingredients.push(ingredient);
             })
             .catch(error => {
                 console.log(error)
             });
         });
+
+        this.$root.$on("login", () => {
+            let credentials = JSON.parse(window.localStorage.getItem('my_credentials'))
+            this.token = (credentials == null || credentials == undefined)
+                ? null
+                : credentials.token
+        })
     }
 })

@@ -3,10 +3,21 @@ package polytech
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import io.javalin.Javalin
+import io.javalin.security.Role
+import io.javalin.security.SecurityUtil.roles
 import io.javalin.staticfiles.Location
+import javalinjwt.JWTGenerator
 import javalinjwt.JWTProvider
 import javalinjwt.JavalinJWT
 import javalinjwt.examples.JWTResponse
+import javalinjwt.JWTAccessManager
+import java.util.HashMap
+
+enum class Roles : Role {
+    ANYONE,
+    USER,
+    ADMIN
+}
 
 fun main(args: Array<String>) {
 
@@ -27,9 +38,12 @@ fun main(args: Array<String>) {
 
     data class User(var name: String, var level: String)
 
+
+    val rolesMapping = HashMap<String, Role>()
+
     val algorithm = Algorithm.HMAC256("very_secret")
 
-    val generator = { user, alg ->
+    val generator = JWTGenerator<User> { user, alg ->
         val token = JWT.create()
             .withClaim("name", user.name)
             .withClaim("level", user.level)
@@ -40,52 +54,55 @@ fun main(args: Array<String>) {
 
     val provider = JWTProvider(algorithm, generator, verifier)
 
-    val validateHandler = { ctx ->
-        val decodedJWT = JavalinJWT.getTokenFromHeader(ctx).flatMap(provider::validateToken)
-
-        if (!decodedJWT.isPresent()) {
-            ctx.status(401).result("Missing or invalid token")
-        } else {
-            ctx.result("Hi " + decodedJWT.get().getClaim("name").asString())
-        }
-    }
+    val accessManager = JWTAccessManager("level", rolesMapping, Roles.ANYONE)
 
     val app = Javalin.create()
 
-    app.enableStaticFiles("./public", Location.EXTERNAL).start(7000)
+    app.enableStaticFiles("./public", Location.EXTERNAL)
+    app.accessManager(accessManager)
+    app.start(7000)
 
-    app.before("/*/*", validateHandler)
+    app.before(JavalinJWT.createHeaderDecodeHandler(provider))
 
-    app.get("/hello") { ctx -> ctx.result("Hello World") }
 
-    app.get("/hello-world") { ctx -> ctx.json(Message("Hello World")) }
+    app.get("/hello", {
+        ctx -> ctx.result("Hello World")
+    }, roles(Roles.ANYONE))
 
-    app.get("/messages") { ctx -> ctx.json(messages) }
+    app.get("/hello-world", {
+        ctx -> ctx.json(Message("Hello World"))
+    }, roles(Roles.ANYONE))
 
-    app.post("/messages") { ctx ->
+    app.get("/messages", {
+        ctx -> ctx.json(messages)
+    }, roles(Roles.ANYONE))
+
+    app.post("/messages", { ctx ->
 
         val newMessage = Message(ctx.formParam("text").toString())
         messages.add(newMessage)
         ctx.json(newMessage).status(201)
-    }
+    }, roles(Roles.ANYONE))
 
-    app.get("/kebab-ingredients") { ctx -> ctx.json(kebabIngredients) }
+    app.get("/kebab-ingredients", {
+        ctx -> ctx.json(kebabIngredients)
+    }, roles(Roles.ANYONE))
 
-    app.post("/kebab-ingredients") { ctx ->
+    app.post("/kebab-ingredients", { ctx ->
         val newIngredient = Ingredient(ctx.formParam("label").toString())
         kebabIngredients.add(newIngredient)
         ctx.json(newIngredient).status(201)
-    }
+    }, roles(Roles.USER, Roles.ADMIN))
 
-    app.delete("/kebab-ingredients") { ctx ->
+    app.delete("/kebab-ingredients", { ctx ->
         val ingredientToDelete = Ingredient(ctx.formParam("label").toString())
         kebabIngredients.remove(ingredientToDelete)
         ctx.json(ingredientToDelete).status(201)
-    }
+    }, roles(Roles.USER, Roles.ADMIN))
 
-    app.post("/admin/login") { ctx ->
+    app.post("/admin/login", { ctx ->
         val mockUser = User("Mocky McMockface", "user")
         val token = provider.generateToken(mockUser)
         ctx.json(JWTResponse(token))
-    }
+    }, roles(Roles.ANYONE))
 }

@@ -34,7 +34,6 @@ Vue.component(`messages-list`, {
         this.populateTheList()
 
         this.$root.$on("add-message", (message) => {
-            this.messages.push(message);
             fetch(`/messages`, {
                 method: 'POST',
                 headers: {
@@ -45,6 +44,7 @@ Vue.component(`messages-list`, {
             .then(response => response.json())
             .then(data => {
                 console.log(data)
+                this.messages.push(message);
             })
             .catch(error => {
                 console.log(error)
