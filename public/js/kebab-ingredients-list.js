@@ -32,14 +32,14 @@ Vue.component(`kebab-ingredients-list`, {
             })
             .catch(error => {
                 console.log(error);
-            })
+            });
         },
         deleteIngredient: function(ingredient) {
             fetch(`/kebab-ingredients`, {
                 method: 'DELETE',
                 headers: {
                     "Content-Type": "text/plain",
-                    "token": this.token
+                    "Authorization": "Bearer " + this.token
                 },
                 body: "label=" + ingredient
             })
@@ -57,12 +57,11 @@ Vue.component(`kebab-ingredients-list`, {
         this.populateTheList()
 
         this.$root.$on("add-ingredient", (ingredient) => {
-            console.log(this.token);
             fetch(`/kebab-ingredients`, {
                 method: 'POST',
                 headers: {
                     "Content-Type": "text/plain",
-                    "token": this.token
+                    "Authorization": "Bearer " + this.token
                 },
                 body: "label=" + ingredient
             })
@@ -77,10 +76,10 @@ Vue.component(`kebab-ingredients-list`, {
         });
 
         this.$root.$on("login", () => {
-            let credentials = JSON.parse(window.localStorage.getItem('my_credentials'))
+            let credentials = JSON.parse(window.localStorage.getItem('my_credentials'));
             this.token = (credentials == null || credentials == undefined)
                 ? null
                 : credentials.token
-        })
+        });
     }
 })

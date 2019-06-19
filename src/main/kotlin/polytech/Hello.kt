@@ -59,11 +59,11 @@ fun main(args: Array<String>) {
     val app = Javalin.create()
 
     app.enableStaticFiles("./public", Location.EXTERNAL)
-    app.accessManager(accessManager)
-    app.start(7000)
 
     app.before(JavalinJWT.createHeaderDecodeHandler(provider))
+    app.accessManager(accessManager)
 
+    app.start(7000)
 
     app.get("/hello", {
         ctx -> ctx.result("Hello World")

@@ -18,7 +18,9 @@ Vue.component(`login`, {
                         </div>
                         </template>
                         <template v-else>
-                            {{ username }}
+                            <div class="navbar-item" style="color: lightgray">
+                                {{ username }}
+                            </div>
                         </template>
                     </div>
                 </div>
