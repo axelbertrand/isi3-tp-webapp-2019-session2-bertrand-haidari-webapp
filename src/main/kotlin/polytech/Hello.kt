@@ -40,6 +40,8 @@ fun main(args: Array<String>) {
 
 
     val rolesMapping = HashMap<String, Role>()
+    rolesMapping[Roles.ADMIN.name] = Roles.ADMIN
+    rolesMapping[Roles.USER.name] = Roles.USER
 
     val algorithm = Algorithm.HMAC256("very_secret")
 
@@ -101,7 +103,7 @@ fun main(args: Array<String>) {
     }, roles(Roles.USER, Roles.ADMIN))
 
     app.post("/admin/login", { ctx ->
-        val mockUser = User("Mocky McMockface", "user")
+        val mockUser = User("Mocky McMockface", Roles.ADMIN.name)
         val token = provider.generateToken(mockUser)
         ctx.json(JWTResponse(token))
     }, roles(Roles.ANYONE))

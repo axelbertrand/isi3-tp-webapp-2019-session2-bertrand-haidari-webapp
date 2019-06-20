@@ -46,9 +46,7 @@ Vue.component(`login`, {
                     name: this.username, pwd: this.password
                 }), // body data type must match "Content-Type" header
             })
-            .then(response => {
-                return response.json()
-            })
+            .then(response => response.json())
             .then(data =>  {
                 this.token = (!data.jwt)
                     ? null

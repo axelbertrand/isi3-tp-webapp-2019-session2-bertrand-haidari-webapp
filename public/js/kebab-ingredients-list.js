@@ -31,25 +31,32 @@ Vue.component(`kebab-ingredients-list`, {
                 data.forEach(ingredient => this.ingredients.push(ingredient.label));
             })
             .catch(error => {
-                console.log(error);
+                console.error(error);
             });
         },
         deleteIngredient: function(ingredient) {
             fetch(`/kebab-ingredients`, {
                 method: 'DELETE',
                 headers: {
-                    "Content-Type": "text/plain",
+                    "Content-Type": "application/x-www-form-urlencoded",
                     "Authorization": "Bearer " + this.token
                 },
                 body: "label=" + ingredient
             })
-            .then(response => response.json())
+            .then(response => {
+                if(!response.ok) {
+                    throw new Error(response.json());
+                }
+                else {
+                    response.json();
+                }
+            })
             .then(data => {
                 console.log(data)
                 this.ingredients = this.ingredients.filter(item => item !== ingredient);
             })
             .catch(error => {
-                console.log(error)
+                console.error(error)
             });
         }
     },
@@ -60,18 +67,24 @@ Vue.component(`kebab-ingredients-list`, {
             fetch(`/kebab-ingredients`, {
                 method: 'POST',
                 headers: {
-                    "Content-Type": "text/plain",
+                    "Content-Type": "application/x-www-form-urlencoded",
                     "Authorization": "Bearer " + this.token
                 },
                 body: "label=" + ingredient
             })
-            .then(response => response.json())
+            .then(response => {
+                if(!response.ok) {
+                    throw new Error(response.json());
+                } else {
+                    return response.json();
+                }
+            })
             .then(data => {
                 console.log(data)
                 this.ingredients.push(ingredient);
             })
             .catch(error => {
-                console.log(error)
+                console.error(error)
             });
         });
 
