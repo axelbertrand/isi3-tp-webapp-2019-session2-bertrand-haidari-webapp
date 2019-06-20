@@ -4,7 +4,7 @@ Vue.component(`login`, {
         <div class="container">
             <div class="navbar-menu">
                 <div class="navbar-start">
-                    <template v-if="token === null">
+                    <template v-if="!connected">
                         <div class="navbar-item">
                             <input v-model="username" type="text" placeholder="Username" class="input">
                         </div>
@@ -21,6 +21,11 @@ Vue.component(`login`, {
                             <div class="navbar-item" style="color: lightgray">
                                 {{ username }}
                             </div>
+                            <div class="navbar-item">
+                                <button v-on:click="logout" class="button is-danger">
+                                    Log out
+                                </button>
+                            </div>
                         </template>
                     </div>
                 </div>
@@ -32,11 +37,11 @@ Vue.component(`login`, {
         return {
             username: null,
             password: null,
-            token: null
+            connected: false
         }
     },
     methods: {
-        login(event) {
+        login() {
             fetch(`/admin/login`, {
                 method: 'POST',
                 headers: {
@@ -48,14 +53,22 @@ Vue.component(`login`, {
             })
             .then(response => response.json())
             .then(data =>  {
-                this.token = (!data.jwt)
+                let token = (!data.jwt)
                     ? null
                     : JSON.stringify({token: data.jwt, user: this.username});
 
-                window.localStorage.setItem('my_credentials', this.token);
-                this.$root.$emit("login");
+                window.localStorage.setItem('my_credentials', token);
+                this.connected = true;
+                this.$root.$emit("log-action");
             })
             .catch(error => {});
+        },
+        logout() {
+            window.localStorage.setItem('my_credentials', null);
+            this.connected = false;
+            this.username = null;
+            this.password = null;
+            this.$root.$emit("log-action");
         }
     }
 })

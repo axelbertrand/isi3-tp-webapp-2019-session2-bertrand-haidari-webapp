@@ -45,7 +45,7 @@ Vue.component(`kebab-ingredients-list`, {
             })
             .then(response => {
                 if(!response.ok) {
-                    throw new Error(response.json());
+                    throw new Error(response);
                 }
                 else {
                     response.json();
@@ -74,7 +74,7 @@ Vue.component(`kebab-ingredients-list`, {
             })
             .then(response => {
                 if(!response.ok) {
-                    throw new Error(response.json());
+                    throw new Error(response);
                 } else {
                     return response.json();
                 }
@@ -88,7 +88,7 @@ Vue.component(`kebab-ingredients-list`, {
             });
         });
 
-        this.$root.$on("login", () => {
+        this.$root.$on("log-action", () => {
             let credentials = JSON.parse(window.localStorage.getItem('my_credentials'));
             this.token = (credentials == null || credentials == undefined)
                 ? null
